@@ -1,114 +1,143 @@
 # pygame is just used to create a window with the operating system on which to draw.
-import pyglet.window
-from pyglet.gl import *
-from pyglet.window import key, mouse
+import pygame
+
 # imports all openGL functions
+from OpenGL.GL import *
+
+# import the shader class
+from shaders import *
 
 # import the camera class
 from camera import Camera
-from pywavefront import visualization
+
 # and we import a bunch of helper functions
 from matutils import *
-import ctypes
+
 from lightSource import LightSource
 
-
-class Scene(pyglet.window.Window):
+class Scene:
     '''
     This is the main class for adrawing an OpenGL scene using the PyGame library
     '''
-    def __init__(self, width=1280, height=720, shaders=None):
+    def __init__(self, width=800, height=600, shaders=None):
         '''
         Initialises the scene
         '''
-        super(Scene, self).__init__(width, height)
+
+        self.window_size = (width, height)
 
         # by default, wireframe mode is off
         self.wireframe = False
-        self.alive = True
-        self.window_size = [width, height]
-        self.lightfv = ctypes.c_float * 4
 
-        # initialise the camera variables
+        # the first two lines initialise the pygame window. You could use another library for this,
+        # for example GLut or Qt
+        pygame.init()
+        screen = pygame.display.set_mode(self.window_size, pygame.OPENGL | pygame.DOUBLEBUF, 24)
+
+        # Here we start initialising the window from the OpenGL side
+        glViewport(0, 0, self.window_size[0], self.window_size[1])
+
+        # this selects the background color
+        glClearColor(0.7, 0.7, 1.0, 1.0)
+
+        # enable back face culling (see lecture on clipping and visibility
+        glEnable(GL_CULL_FACE)
+        # depending on your model, or your projection matrix, the winding order may be inverted,
+        # Typically, you see the far side of the model instead of the front one
+        # uncommenting the following line should provide an easy fix.
+        #glCullFace(GL_FRONT)
+
+        # enable the vertex array capability
+        glEnableClientState(GL_VERTEX_ARRAY)
+
+        # enable depth test for clean output (see lecture on clipping & visibility for an explanation
+        glEnable(GL_DEPTH_TEST)
+
+        # set the default shader program (can be set on a per-mesh basis)
+        self.shaders = 'flat'
+
+        # initialise the projective transform
+        near = 1.0
+        far = 20.0
+        left = -1.0
+        right = 1.0
+        top = -1.0
+        bottom = 1.0
+
+        # cycle through models
+        self.show_model = -1
+
+        # to start with, we use an orthographic projection; change this.
+        self.P = frustumMatrix(left, right, top, bottom, near, far)
+
+        # initialises the camera object
         self.camera = Camera()
-        self.fov = 45
-        self.dragging = False
+
+        # initialise the light source
+        self.light = LightSource(self, position=[5., 5., 5.])
+
+        # rendering mode for the shaders
+        self.mode = 1  # initialise to full interpolated shading
+
         # This class will maintain a list of models to draw in the scene,
         self.models = []
 
-    def on_resize(self, width, height):
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
-
-        # Define the frustum matrix
-        gluPerspective(45, float(width) / height, 1., 100.)
-        glMatrixMode(GL_MODELVIEW)
-        return True
-
-    def add_model(self, model, M):
+    def add_model(self, model):
         '''
         This method just adds a model to the scene.
-        :param model: The model object to add to the scene and its position matrix
+        :param model: The model object to add to the scene
         :return: None
         '''
 
         # bind the default shader to the mesh
-        # model.bind_shader(self.shaders)
+        #model.bind_shader(self.shaders)
 
         # and add to the list
-        self.models.append([model, M])
+        self.models.append(model)
 
-    def draw(self):
+    def add_models_list(self, models_list):
+        '''
+        This method just adds a model to the scene.
+        :param model: The model object to add to the scene
+        :return: None
+        '''
+        for model in models_list:
+            self.add_model(model)
+
+    def draw(self, framebuffer=False):
         '''
         Draw all models in the scene
         :return: None
         '''
 
-        # first we need to clear
-        # the scene, we also clear the depth buffer to handle occlusions
+        # first we need to clear the scene, we also clear the depth buffer to handle occlusions
+        if not framebuffer:
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        self.clear()
-
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
-
-        # Define the frustum matrix
-        gluPerspective(self.camera.zoom, float(self.window_size[0]) / float(self.window_size[1]), 0.1, 100.)
-        self.camera.getViewMatrix()
-        glMatrixMode(GL_MODELVIEW)
-
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        glLoadIdentity()
-        glLightfv(GL_LIGHT0, GL_POSITION, self.lightfv(-1.0, 1.0, 1.0, 0.0))
-
-        # ensure that the camera view matrix is up to date
-        # self.camera.update()
+            # ensure that the camera view matrix is up to date
+            self.camera.update()
 
         # then we loop over all models in the list and draw them
         for model in self.models:
-            M = model[1]
-            glLoadIdentity()
+            model.draw()
 
-            # Apply the model matrix to the object
-            glTranslatef(M[0][0], M[0][1], M[0][2])
-            glRotatef(M[1][0], M[1][1], M[1][2], M[1][3])
-            glScalef(M[2][0], M[2][1], M[2][2])
+        # once we are done drawing, we display the scene
+        # Note that here we use double buffering to avoid artefacts:
+        # we draw on a different buffer than the one we display,
+        # and flip the two buffers once we are done drawing.
+        if not framebuffer:
+            pygame.display.flip()
 
-            # Draw the model to the screen
-            visualization.draw(model[0])
-
-        self.flip()
-
-    def on_key_press(self, symbol, modifiers):
+    def keyboard(self, event):
         '''
         Method to process keyboard events. Check Pygame documentation for a list of key events
         :param event: the event object that was raised
         '''
-        if symbol == key.Q:
-            self.alive = False
+        if event.key == pygame.K_q:
+            self.running = False
 
         # flag to switch wireframe rendering
-        elif symbol == key._0:
+        elif event.key == pygame.K_0:
             if self.wireframe:
                 print('--> Rendering using colour fill')
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
@@ -118,40 +147,70 @@ class Scene(pyglet.window.Window):
                 glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
                 self.wireframe = True
 
+    def pygameEvents(self):
+        '''
+        Method to handle PyGame events for user interaction.
+        '''
+        # check whether the window has been closed
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
 
-    def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
-        # Mouse drag events
-        if buttons & mouse.LEFT:
-            if modifiers == key.LCTRL and dy > 0:
-                # Brighten the scene
-                self.light.position *= 1.1
-                self.light.update()
-            elif modifiers == key.LCTRL and dy < 0:
-                # Dim the scene
-                self.light.position *= 0.9
-                self.light.update()
-            else:
-                # Translate the camera
-                if self.dragging:
-                    self.camera.mouse_movement(dx, dy)
+            # keyboard events
+            elif event.type == pygame.KEYDOWN:
+                self.keyboard(event)
+
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mods = pygame.key.get_mods()
+                if event.button == 4:
+                    #pass
+                    #TODO: WS2
+                    if mods & pygame.KMOD_CTRL:
+                        self.light.position *= 1.1
+                        self.light.update()
+                    else:
+                        self.camera.distance = max(1, self.camera.distance - 1)
+
+                elif event.button == 5:
+                    #pass
+                    #TODO: WS2
+                    if mods & pygame.KMOD_CTRL:
+                        self.light.position *= 0.9
+                        self.light.update()
+                    else:
+                        self.camera.distance += 1
+
+            elif event.type == pygame.MOUSEMOTION:
+                if pygame.mouse.get_pressed()[0]:
+                    if self.mouse_mvt is not None:
+                        self.mouse_mvt = pygame.mouse.get_rel()
+                        #TODO: WS2
+                        self.camera.center[0] -= (float(self.mouse_mvt[0]) / self.window_size[0])
+                        self.camera.center[1] -= (float(self.mouse_mvt[1]) / self.window_size[1])
+                    else:
+                        self.mouse_mvt = pygame.mouse.get_rel()
+
+                elif pygame.mouse.get_pressed()[2]:
+                    if self.mouse_mvt is not None:
+                        self.mouse_mvt = pygame.mouse.get_rel()
+                        #TODO: WS2
+                        self.camera.phi -= (float(self.mouse_mvt[0]) / self.window_size[0])
+                        self.camera.psi -= (float(self.mouse_mvt[1]) / self.window_size[1])
+                    else:
+                        self.mouse_mvt = pygame.mouse.get_rel()
                 else:
-                    self.dragging = True
-
-        if buttons & mouse.RIGHT:
-            self.camera.mouse_turn(dx, dy)
-
-    def on_mouse_release(self, x, y, button, modifiers):
-        self.dragging = False
-
-    def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
-        self.camera.scroll(scroll_y)
-
-
-    def on_draw(self):
-        self.draw()
-
+                    self.mouse_mvt = None
 
     def run(self):
-        while self.alive:
-            self.dispatch_events()
+        '''
+        Draws the scene in a loop until exit.
+        '''
+
+        # We have a classic program loop
+        self.running = True
+        while self.running:
+
+            self.pygameEvents()
+
+            # otherwise, continue drawing
             self.draw()
