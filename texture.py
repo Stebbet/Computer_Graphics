@@ -6,7 +6,7 @@ import numpy as np
 class ImageWrapper:
     def __init__(self, name):
         # load the image from file using pyGame - any other image reading function could be used here.
-        print('Loading image: texture/{}'.format(name))
+        #print('Loading image: texture/{}'.format(name))
         self.img = pygame.image.load('./textures/{}'.format(name))
 
     def width(self):
@@ -37,7 +37,7 @@ class Texture:
 
         self.textureid = glGenTextures(1)
 
-        print('* Loading texture {} at ID {}'.format('./textures/{}'.format(name), self.textureid))
+        # print('* Loading texture {} at ID {}'.format('./textures/{}'.format(name), self.textureid))
 
         self.bind()
 

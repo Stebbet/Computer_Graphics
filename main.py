@@ -66,6 +66,12 @@ class ExeterScene(Scene):
                                       M=poseMatrix(position=[0, 0, 0], orientation=[0, 0, 0], scale=[0.3, 0.3, 0.3]),
                                       mesh=dino[0], shader=ShadowMappingShader(shadow_map=self.shadows), name='dino')
 
+        city = load_obj_file('models/city.obj')
+        self.city = [
+            DrawModelFromMesh(scene=self, M=translationMatrix([0, 0, 0]), mesh=mesh, shader=TextureShader(), name='city')
+            for mesh in city]
+
+
         # bunny = load_obj_file('models/bunny_world.obj')
         # self.bunny = DrawModelFromMesh(scene=self, M=np.matmul(translationMatrix([0,0,0]), scaleMatrix([0.5,0.5,0.5])), mesh=bunny[0], shader=TextureShader())
 
@@ -83,8 +89,9 @@ class ExeterScene(Scene):
         # first we need to clear the scene, we also clear the depth buffer to handle occlusions
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
+        """
         # also all models from the table
-        for model in self.table:
+        #for model in self.table:
             model.draw()
 
         # and for the box
@@ -92,10 +99,11 @@ class ExeterScene(Scene):
             model.draw()
 
         self.dino.draw()
+        """
 
     def draw_reflections(self):
         self.skybox.draw()
-
+        """
         for model in self.models:
             model.draw()
 
@@ -108,6 +116,7 @@ class ExeterScene(Scene):
             model.draw()
 
         self.dino.draw()
+        """
 
     def draw(self, framebuffer=False):
         '''
@@ -143,7 +152,7 @@ class ExeterScene(Scene):
             # self.sphere.draw()
             # glDisable(GL_BLEND)
 
-            # if enabled, show flattened cube
+
             self.flattened_cube.draw()
 
             # if enabled, show texture
@@ -152,6 +161,7 @@ class ExeterScene(Scene):
             self.show_shadow_map.draw()
 
         # then we loop over all models in the list and draw them
+        """
         for model in self.models:
             model.draw()
 
@@ -161,6 +171,10 @@ class ExeterScene(Scene):
 
         # and for the box
         for model in self.box:
+            model.draw()
+        """
+
+        for model in self.city:
             model.draw()
 
         self.show_light.draw()
