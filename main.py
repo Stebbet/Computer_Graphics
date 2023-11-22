@@ -12,6 +12,8 @@ from BaseModel import DrawModelFromMesh
 
 from shaders import *
 
+from math import sin, cos
+
 from ShadowMapping import *
 
 from sphereModel import Sphere
@@ -24,7 +26,7 @@ from environmentMapping import *
 class ExeterScene(Scene):
     def __init__(self):
         Scene.__init__(self)
-
+        self.dt = 0.
         self.light = LightSource(self, position=[3., 4., -3.])
 
         self.shaders = 'phong'
@@ -61,16 +63,20 @@ class ExeterScene(Scene):
         # self.sphere = DrawModelFromMesh(scene=self, M=poseMatrix(), mesh=Sphere(), shader=EnvironmentShader(map=self.environment))
         # self.sphere = DrawModelFromMesh(scene=self, M=poseMatrix(), mesh=Sphere(), shader=FlatShader())
 
-        dino = load_obj_file('models/styracosaurus.obj')
+        dino = load_obj_file('models/Deinonychus.obj')
         self.dino = DrawModelFromMesh(scene=self,
-                                      M=poseMatrix(position=[0, 0, 0], orientation=[0, 0, 0], scale=[0.3, 0.3, 0.3]),
-                                      mesh=dino[0], shader=ShadowMappingShader(shadow_map=self.shadows), name='dino')
+                                      M=poseMatrix(position=[0, 0, 0], orientation=[0, 0, 0], scale=[0.03, 0.03, 0.03]),
+                                      mesh=dino[0], shader=TextureShader(), name='dino')
 
-        city = load_obj_file('models/city.obj')
-        self.city = [
-            DrawModelFromMesh(scene=self, M=translationMatrix([0, 0, 0]), mesh=mesh, shader=TextureShader(), name='city')
-            for mesh in city]
+        dragon = load_obj_file('models/dragon.obj')
+        self.dragon = DrawModelFromMesh(scene=self,
+                                        M=poseMatrix([0, 0, 0], orientation=[0, 0, 0], scale=[0.02, 0.02, 0.02]),
+                                        mesh=dragon[0], shader=TextureShader(), name='dragon')
 
+        # city = load_obj_file('models/city.obj')
+        # self.city = [
+        #    DrawModelFromMesh(scene=self, M=translationMatrix([0, 0, 0]), mesh=mesh, shader=ShadowMappingShader(shadow_map=self.shadows), name='city')
+        #   for mesh in city]
 
         # bunny = load_obj_file('models/bunny_world.obj')
         # self.bunny = DrawModelFromMesh(scene=self, M=np.matmul(translationMatrix([0,0,0]), scaleMatrix([0.5,0.5,0.5])), mesh=bunny[0], shader=TextureShader())
@@ -123,7 +129,6 @@ class ExeterScene(Scene):
         Draw all models in the scene
         :return: None
         '''
-
         # first we need to clear the scene, we also clear the depth buffer to handle occlusions
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
@@ -133,7 +138,7 @@ class ExeterScene(Scene):
 
         # first, we draw the skybox
         self.skybox.draw()
-
+       # self.rotate_model()
         # render the shadows
         self.shadows.render(self)
 
@@ -148,10 +153,10 @@ class ExeterScene(Scene):
             # self.environment.update(self)
 
             # self.bunny.draw()
-            self.dino.draw()
+            # self.dino.draw()
+            self.dragon.draw()
             # self.sphere.draw()
             # glDisable(GL_BLEND)
-
 
             self.flattened_cube.draw()
 
@@ -173,9 +178,6 @@ class ExeterScene(Scene):
         for model in self.box:
             model.draw()
         """
-
-        for model in self.city:
-            model.draw()
 
         self.show_light.draw()
 
@@ -254,6 +256,11 @@ class ExeterScene(Scene):
             else:
                 print('--> enable GL_DEPTH_TEST')
                 glEnable(GL_DEPTH_TEST)
+
+    def rotate_model(self):
+        self.dt += 0.003
+        self.dino.M = poseMatrix(position=[0,0,0],orientation=[0.3 * sin(self.dt), self.dt, 0], scale=[0.3,0.3,0.3])
+
 
 
 if __name__ == '__main__':
