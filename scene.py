@@ -45,7 +45,7 @@ class Scene:
         # depending on your model, or your projection matrix, the winding order may be inverted,
         # Typically, you see the far side of the model instead of the front one
         # uncommenting the following line should provide an easy fix.
-        #glCullFace(GL_FRONT)
+        glCullFace(GL_BACK)
 
         # enable the vertex array capability
         glEnableClientState(GL_VERTEX_ARRAY)
@@ -58,7 +58,7 @@ class Scene:
 
         # initialise the projective transform
         near = 1.0
-        far = 20.0
+        far = 50.0
         left = -1.0
         right = 1.0
         top = -1.0
@@ -75,6 +75,7 @@ class Scene:
 
         # initialise the light source
         self.light = LightSource(self, position=[5., 5., 5.])
+        self.light2 = LightSource(self, position=[5., 5., 5.])
 
         # rendering mode for the shaders
         self.mode = 1  # initialise to full interpolated shading
@@ -168,6 +169,8 @@ class Scene:
                     if mods & pygame.KMOD_CTRL:
                         self.light.position *= 1.1
                         self.light.update()
+                        self.light2.position *= 1.1
+                        self.light2.update()
                     else:
                         self.camera.distance = max(1, self.camera.distance - 1)
 
@@ -177,6 +180,8 @@ class Scene:
                     if mods & pygame.KMOD_CTRL:
                         self.light.position *= 0.9
                         self.light.update()
+                        self.light2.position *= 0.9
+                        self.light2.update()
                     else:
                         self.camera.distance += 1
 
@@ -185,7 +190,7 @@ class Scene:
                     if self.mouse_mvt is not None:
                         self.mouse_mvt = pygame.mouse.get_rel()
                         #TODO: WS2
-                        self.camera.center[0] -= (float(self.mouse_mvt[0]) / self.window_size[0])
+                        self.camera.center[0] += (float(self.mouse_mvt[0]) / self.window_size[0])
                         self.camera.center[1] -= (float(self.mouse_mvt[1]) / self.window_size[1])
                     else:
                         self.mouse_mvt = pygame.mouse.get_rel()

@@ -105,7 +105,7 @@ class BaseShaderProgram:
         '''
 
         self.name = name
-        print('Creating shader program: {}'.format(name) )
+       # print('Creating shader program: {}'.format(name) )
 
         if name is not None:
             vertex_shader = 'shaders/{}/vertex_shader.glsl'.format(name)
@@ -125,7 +125,7 @@ class BaseShaderProgram:
                 }
             '''
         else:
-            print('Load vertex shader from file: {}'.format(vertex_shader))
+            #print('Load vertex shader from file: {}'.format(vertex_shader))
             with open(vertex_shader, 'r') as file:
                 self.vertex_shader_source = file.read()
             # print(self.vertex_shader_source)
@@ -139,7 +139,7 @@ class BaseShaderProgram:
                 }
             '''
         else:
-            print('Load fragment shader from file: {}'.format(fragment_shader))
+            #print('Load fragment shader from file: {}'.format(fragment_shader))
             with open(fragment_shader, 'r') as file:
                 self.fragment_shader_source = file.read()
             # print(self.fragment_shader_source)
@@ -158,7 +158,7 @@ class BaseShaderProgram:
         Call this function to compile the GLSL codes for both shaders.
         :return:
         '''
-        print('Compiling GLSL shaders [{}]...'.format(self.name))
+        #print('Compiling GLSL shaders [{}]...'.format(self.name))
         try:
             self.program = glCreateProgram()
             glAttachShader(self.program, shaders.compileShader(self.vertex_shader_source, shaders.GL_VERTEX_SHADER))
@@ -187,7 +187,7 @@ class BaseShaderProgram:
         # bind all shader attributes to the correct locations in the VAO
         for name, location in attributes.items():
             glBindAttribLocation(self.program, location, name)
-            print('Binding attribute {} to location {}'.format(name, location))
+            #print('Binding attribute {} to location {}'.format(name, location))
 
     def bind(self, model, M):
         '''

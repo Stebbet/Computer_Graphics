@@ -3,7 +3,6 @@ import pygame
 # import the scene class
 from cubeMap import FlattenCubeMap
 from scene import Scene
-
 from lightSource import LightSource
 
 from blender import load_obj_file
@@ -12,7 +11,7 @@ from BaseModel import DrawModelFromMesh
 
 from shaders import *
 
-from math import sin, cos
+from math import sin, cos, radians
 
 from ShadowMapping import *
 
@@ -27,59 +26,84 @@ class ExeterScene(Scene):
     def __init__(self):
         Scene.__init__(self)
         self.dt = 0.
-        self.light = LightSource(self, position=[3., 4., -3.])
+        self.light = LightSource(self, position=[-3., 9, 3.], Ia=[0.6,0.6,0.6], Id=[.6,139/500,147/500], Is=[.5,139/500,147/500])
 
         self.shaders = 'phong'
 
         # for shadow map rendering
         self.shadows = ShadowMap(light=self.light)
+        self.draw_shadows = True
         self.show_shadow_map = ShowTexture(self, self.shadows)
-
-        meshes = load_obj_file('models/scene.obj')
-        self.add_models_list(
-            [DrawModelFromMesh(scene=self, M=np.matmul(translationMatrix([0, -1, 0]), scaleMatrix([0.5, 0.5, 0.5])),
-                               mesh=mesh, shader=ShadowMappingShader(shadow_map=self.shadows), name='scene') for mesh in
-             meshes]
-        )
-
-        table = load_obj_file('models/quad_table.obj')
-        self.table = [DrawModelFromMesh(scene=self, M=translationMatrix([0, -4, +0]), mesh=mesh,
-                                        shader=ShadowMappingShader(shadow_map=self.shadows), name='table') for mesh in
-                      table]
-
-        box = load_obj_file('models/fluid_border.obj')
-        self.box = [
-            DrawModelFromMesh(scene=self, M=translationMatrix([0, 0, 0]), mesh=mesh, shader=self.shaders, name='box')
-            for mesh in box]
 
         # draw a skybox for the horizon
         self.skybox = SkyBox(scene=self)
 
         self.show_light = DrawModelFromMesh(scene=self, M=poseMatrix(position=self.light.position, scale=0.2),
-                                            mesh=Sphere(material=Material(Ka=[10, 10, 10])), shader=FlatShader())
+                                            mesh=Sphere(material=Material(Ka=self.light.Id)), shader=FlatShader())
+
 
         self.environment = EnvironmentMappingTexture(width=200, height=200)
 
         # self.sphere = DrawModelFromMesh(scene=self, M=poseMatrix(), mesh=Sphere(), shader=EnvironmentShader(map=self.environment))
         # self.sphere = DrawModelFromMesh(scene=self, M=poseMatrix(), mesh=Sphere(), shader=FlatShader())
 
-        dino = load_obj_file('models/Deinonychus.obj')
-        self.dino = DrawModelFromMesh(scene=self,
-                                      M=poseMatrix(position=[0, 0, 0], orientation=[0, 0, 0], scale=[0.03, 0.03, 0.03]),
-                                      mesh=dino[0], shader=TextureShader(), name='dino')
 
-        dragon = load_obj_file('models/dragon.obj')
-        self.dragon = DrawModelFromMesh(scene=self,
-                                        M=poseMatrix([0, 0, 0], orientation=[0, 0, 0], scale=[0.02, 0.02, 0.02]),
-                                        mesh=dragon[0], shader=TextureShader(), name='dragon')
+        # The ground and river
+        self.groundlevel = -2
+        floor = load_obj_file('models/scene.obj')
+        self.floor = [DrawModelFromMesh(scene=self,
+                                       M=poseMatrix(position=[0, self.groundlevel, 0], orientation=[0, 0, 0],
+                                                    scale=[.5,.5,.5]),
+                                       mesh=mesh, shader=ShadowMappingShader(shadow_map=self.shadows), name='floor') for mesh in floor]
 
-        # city = load_obj_file('models/city.obj')
-        # self.city = [
-        #    DrawModelFromMesh(scene=self, M=translationMatrix([0, 0, 0]), mesh=mesh, shader=ShadowMappingShader(shadow_map=self.shadows), name='city')
-        #   for mesh in city]
+        # Define the Pterodactyls
+        self.pterodactyl_scale = 4
+        pterodactyl = load_obj_file('models/pterodactyl.obj')
+        self.pterodactyl = DrawModelFromMesh(scene=self,
+                                        M=poseMatrix(), mesh=pterodactyl[0],
+                                        shader=ShadowMappingShader(shadow_map=self.shadows), name='pterodactyl')
 
-        # bunny = load_obj_file('models/bunny_world.obj')
-        # self.bunny = DrawModelFromMesh(scene=self, M=np.matmul(translationMatrix([0,0,0]), scaleMatrix([0.5,0.5,0.5])), mesh=bunny[0], shader=TextureShader())
+        helicopter = load_obj_file('models/helicopter.obj')
+        self.helicopter = DrawModelFromMesh(scene=self,
+                                             M=poseMatrix(), mesh=helicopter[0],
+                                             shader=ShadowMappingShader(shadow_map=self.shadows), name='helicopter')
+
+        # Office
+        office = load_obj_file('models/office.obj')
+        self.office = [DrawModelFromMesh(scene=self,
+                                        M=poseMatrix(position=[-0.3,-0.9,6.5], orientation=[0,radians(90),0], scale=8), mesh=mesh,
+                                        shader=ShadowMappingShader(shadow_map=self.shadows), name='office') for mesh in office]
+
+
+        self.office2 = [DrawModelFromMesh(scene=self,
+                                        M=poseMatrix(position=[-4, -0.9, -8], orientation=[0,radians(90),0], scale=8), mesh=mesh,
+                                        shader=ShadowMappingShader(shadow_map=self.shadows), name='office') for mesh in office]
+
+        # Bridge Object
+        bridge = load_obj_file('models/bridge.obj')
+        self.bridge = [DrawModelFromMesh(scene=self,
+                                          M=poseMatrix(position=[-1, -1.4, -5], orientation=[0, 0, 0],
+                                                       scale=9), mesh=mesh,
+                                          shader=ShadowMappingShader(shadow_map=self.shadows), name='office') for mesh in bridge]
+
+        # Large buildings
+        large_buildings = load_obj_file('models/large_buildings.obj')
+        self.large_buildings = [DrawModelFromMesh(scene=self,
+                                                  M=poseMatrix(position=[-6, self.groundlevel - .15, 7], orientation=[0, radians(90), 0], scale=16),
+                                                  mesh=mesh, shader=ShadowMappingShader(shadow_map=self.shadows), name='large_buildings') for mesh in large_buildings]
+
+        # Main skyscraper
+        skyscraper = load_obj_file('models/building1.obj')
+        self.skyscraper = [DrawModelFromMesh(scene=self,
+                                             M=poseMatrix(position=[1, self.groundlevel - 1, 0], orientation=[0, 0, 0], scale=0.007),
+                                             mesh=mesh, shader=ShadowMappingShader(self.shadows), name='skyscraper') for mesh in skyscraper]
+
+        # London Wheel
+        wheel = load_obj_file('models/wheel2.obj')
+        self.wheel = [DrawModelFromMesh(scene=self,
+                                        M=poseMatrix(position=[-4, self.groundlevel, 0], orientation=[0, 0, 0], scale=0.003),
+                                        mesh=mesh, shader=ShadowMappingShader(shadow_map=self.shadows),
+                                        name='skyscraper') for mesh in wheel]
 
         # environment box for reflections
         # self.envbox = EnvironmentBox(scene=self)
@@ -89,40 +113,19 @@ class ExeterScene(Scene):
         # self.flattened_cube = FlattenCubeMap(scene=self, cube=CubeMap(name='skybox/ame_ash'))
         self.flattened_cube = FlattenCubeMap(scene=self, cube=self.environment)
 
-        self.show_texture = ShowTexture(self, Texture('lena.bmp'))
 
     def draw_shadow_map(self):
         # first we need to clear the scene, we also clear the depth buffer to handle occlusions
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-
-        """
-        # also all models from the table
-        #for model in self.table:
+        for model in self.skyscraper:
             model.draw()
-
-        # and for the box
-        for model in self.box:
+        for model in self.bridge:
             model.draw()
-
-        self.dino.draw()
-        """
+        self.pterodactyl.draw()
+        self.helicopter.draw()
 
     def draw_reflections(self):
         self.skybox.draw()
-        """
-        for model in self.models:
-            model.draw()
-
-        # also all models from the table
-        for model in self.table:
-            model.draw()
-
-        # and for the box
-        for model in self.box:
-            model.draw()
-
-        self.dino.draw()
-        """
 
     def draw(self, framebuffer=False):
         '''
@@ -138,9 +141,13 @@ class ExeterScene(Scene):
 
         # first, we draw the skybox
         self.skybox.draw()
-       # self.rotate_model()
+
+        # Draw the animations
+        self.animations()
+
         # render the shadows
-        self.shadows.render(self)
+        if self.draw_shadows:
+            self.shadows.render(self)
 
         # when rendering the framebuffer we ignore the reflective object
         if not framebuffer:
@@ -151,35 +158,30 @@ class ExeterScene(Scene):
             # self.envbox.draw()
 
             # self.environment.update(self)
+            for model in self.floor:
+                model.draw()
+            for model in self.skyscraper:
+                model.draw()
+            for model in self.large_buildings:
+                model.draw()
+            for model in self.wheel:
+                model.draw()
+            for model in self.office:
+                model.draw()
+            for model in self.office2:
+                model.draw()
+            for model in self.bridge:
+                model.draw()
 
-            # self.bunny.draw()
-            # self.dino.draw()
-            self.dragon.draw()
-            # self.sphere.draw()
-            # glDisable(GL_BLEND)
+            self.pterodactyl.draw()
+            self.helicopter.draw()
 
             self.flattened_cube.draw()
-
-            # if enabled, show texture
-            self.show_texture.draw()
-
             self.show_shadow_map.draw()
 
+
         # then we loop over all models in the list and draw them
-        """
-        for model in self.models:
-            model.draw()
 
-        # also all models from the table
-        for model in self.table:
-            model.draw()
-
-        # and for the box
-        for model in self.box:
-            model.draw()
-        """
-
-        self.show_light.draw()
 
         # once we are done drawing, we display the scene
         # Note that here we use double buffering to avoid artefacts:
@@ -194,74 +196,24 @@ class ExeterScene(Scene):
         '''
         Scene.keyboard(self, event)
 
-        if event.key == pygame.K_c:
-            if self.flattened_cube.visible:
-                self.flattened_cube.visible = False
-            else:
-                print('--> showing cube map')
-                self.flattened_cube.visible = True
-
-        if event.key == pygame.K_t:
-            if self.show_texture.visible:
-                self.show_texture.visible = False
-            else:
-                print('--> showing texture map')
-                self.show_texture.visible = True
-
-        if event.key == pygame.K_s:
-            if self.show_shadow_map.visible:
-                self.show_shadow_map.visible = False
-            else:
-                print('--> showing shadow map')
-                self.show_shadow_map.visible = True
-
         if event.key == pygame.K_1:
-            print('--> using Flat shading')
-            self.bunny.use_textures = True
-            self.bunny.bind_shader('flat')
-
-        if event.key == pygame.K_2:
-            print('--> using Phong shading')
-            self.bunny.use_textures = True
-            self.bunny.bind_shader('phong')
-
-        elif event.key == pygame.K_4:
-            print('--> using original texture')
-            self.bunny.shader.mode = 1
-
-        elif event.key == pygame.K_6:
-            self.bunny.mesh.material.alpha += 0.1
-            print('--> bunny alpha={}'.format(self.bunny.mesh.material.alpha))
-            if self.bunny.mesh.material.alpha > 1.0:
-                self.bunny.mesh.material.alpha = 0.0
-
-        elif event.key == pygame.K_7:
-            print('--> no face culling')
-            glDisable(GL_CULL_FACE)
-
-        elif event.key == pygame.K_8:
-            print('--> glCullFace(GL_FRONT)')
-            glEnable(GL_CULL_FACE)
-            glCullFace(GL_FRONT)
-
-        elif event.key == pygame.K_9:
-            print('--> glCullFace(GL_BACK)')
-            glEnable(GL_CULL_FACE)
-            glCullFace(GL_BACK)
-
-        elif event.key == pygame.K_BACKQUOTE:
-            if glIsEnabled(GL_DEPTH_TEST):
-                print('--> disable GL_DEPTH_TEST')
-                glDisable(GL_DEPTH_TEST)
+            print('--> using shadows shading')
+            if self.draw_shadows:
+                self.draw_shadows = False
             else:
-                print('--> enable GL_DEPTH_TEST')
-                glEnable(GL_DEPTH_TEST)
+                self.draw_shadows = True
 
-    def rotate_model(self):
-        self.dt += 0.003
-        self.dino.M = poseMatrix(position=[0,0,0],orientation=[0.3 * sin(self.dt), self.dt, 0], scale=[0.3,0.3,0.3])
+    def animations(self):
+        self.dt += 0.01
+        xpos = 2 * sin(self.dt)
+        zpos = 2 * cos(self.dt)
 
+        self.pterodactyl.M = poseMatrix(position=[xpos, 0.3 * sin(self.dt) + 3, zpos],
+                                   orientation=[0.3 * sin(self.dt), radians(90) + self.dt, radians(20)], scale=self.pterodactyl_scale)
 
+        self.helicopter.M = poseMatrix(position=[-xpos, 0.3 * sin(self.dt) + 4, -zpos],
+                                        orientation=[-0.3 * sin(self.dt), radians(-90) + self.dt, radians(20)],
+                                        scale=4)
 
 if __name__ == '__main__':
     # initialises the scene object
@@ -270,3 +222,10 @@ if __name__ == '__main__':
 
     # starts drawing the scene
     scene.run()
+
+#TODO:
+#  - Find a model for the river - DONE
+#  - Design and complete the scene
+#  - Rampaging Trex into Trex animation maybe
+#  - Fire breathing Pterodactyl
+#  - Comment everything better

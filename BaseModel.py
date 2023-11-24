@@ -25,7 +25,7 @@ class BaseModel:
         Initialises the model data
         '''
 
-        print('+ Initializing {}'.format(self.__class__.__name__))
+        # print('+ Initializing {}'.format(self.__class__.__name__))
 
         # if this flag is set to False, the model is not rendered
         self.visible = visible
@@ -72,7 +72,7 @@ class BaseModel:
         self.index_buffer = None
 
     def initialise_vbo(self, name, data):
-        print('Initialising VBO for attribute {}'.format(name))
+        #print('Initialising VBO for attribute {}'.format(name))
 
         if data is None:
             print('(W) Warning in {}.bind_attribute(): Data array for attribute {} is None!'.format(
@@ -124,14 +124,14 @@ class BaseModel:
 
         if self.mesh.vertices is None:
             print('(W) Warning in {}.bind(): No vertex array!'.format(self.__class__.__name__))
-
+        else:
         # initialise vertex position VBO and link to shader program attribute
-        self.initialise_vbo('position', self.mesh.vertices)
-        self.initialise_vbo('normal', self.mesh.normals)
-        self.initialise_vbo('color', self.mesh.colors)
-        self.initialise_vbo('texCoord', self.mesh.textureCoords)
-        self.initialise_vbo('tangent', self.mesh.tangents)
-        self.initialise_vbo('binormal', self.mesh.binormals)
+            self.initialise_vbo('position', self.mesh.vertices)
+            self.initialise_vbo('normal', self.mesh.normals)
+            self.initialise_vbo('color', self.mesh.colors)
+            self.initialise_vbo('texCoord', self.mesh.textureCoords)
+            self.initialise_vbo('tangent', self.mesh.tangents)
+            self.initialise_vbo('binormal', self.mesh.binormals)
 
         # if indices are provided, put them in a buffer too
         if self.mesh.faces is not None:

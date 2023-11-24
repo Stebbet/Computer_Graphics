@@ -58,7 +58,7 @@ def poseMatrix(position=[0,0,0], orientation=[0,0,0], scale=1):
     :return: the 4x4 TRS matrix
     '''
     # apply the position and orientation of the object
-    R = np.matmul(rotationMatrixX(orientation[0]), rotationMatrixY(orientation[1]), rotationMatrixZ(orientation[2]))
+    R = np.matmul(rotationMatrixX(orientation[0]), np.matmul(rotationMatrixY(orientation[1]), rotationMatrixZ(orientation[2])))
     
     T = translationMatrix(position)
 

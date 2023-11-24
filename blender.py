@@ -62,6 +62,9 @@ def process_line(line):
 		label = 's???'
 		return None
 
+	elif fields[0] == 'g':
+		return None
+
 	elif fields[0] == 'f':
 		label = 'face'
 		if len(fields) != 4 and len(fields) != 5:
@@ -75,7 +78,14 @@ def process_line(line):
 		# where vi is the vertex index
 		# ti is the texture index
 		# ni is the normal index (optional)
-		return ( label, [ [np.uint32(i) for i in v.split('/')] for v in fields[1:] ] )
+		split = [[i for i in v.split('/')]for v in fields[1:]]
+
+		if '' in split[1]:
+			[i.pop(1) for i in split]
+		[i.append('0') for i in split]
+		v = ( label, [np.uint32(i) for i in split ])
+
+		return v
 
 	else:
 		print('(E) Unknown line: {}'.format(fields))
@@ -196,9 +206,10 @@ def load_obj_file(file_name):
 				mesh_id += 1
 				# print('[l.{}] Loading mesh with material: {}'.format(line_nb, data[1]))
 
+	m = create_meshes_from_blender(vlist, flist, mlist, tlist, library, mesh_list, lnlist)
 	print('File {} read. Found {} vertices and {} faces.'.format(file_name, len(vlist), len(flist)))
 
-	return create_meshes_from_blender(vlist, flist, mlist, tlist, library, mesh_list, lnlist)
+	return m
 
 
 def create_meshes_from_blender(vlist, flist, mlist, tlist, library, mesh_list, lnlist):

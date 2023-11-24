@@ -1,0 +1,73 @@
+# MTL file - created by a modified js OBJExporter
+
+newmtl Material_359
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pr -345.22100830078125
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd appart2\Material_359.png
+
+newmtl Material_360
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pr -345.22100830078125
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd appart2\Material_360.png
+
+newmtl Material_361
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pr -345.22100830078125
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd appart2\Material_361.png
+
+newmtl Material_362
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pr -345.22100830078125
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd appart2\Material_362.png
+
+newmtl Material_363
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pr -345.22100830078125
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd appart2\Material_363.png
+
+newmtl Material_364
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pr -345.22100830078125
+Pds 1
+Pl 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
+map_Kd appart2\Material_364.png
