@@ -6,7 +6,7 @@ class Framebuffer:
     Basic class to handle rendering to texture using a framebuffer object.
     '''
 
-    def __init__(self, attachment=GL_COLOR_ATTACHMENT0, texture=None):
+    def __init__(self, attachment=GL_COLOR_ATTACHMENT0, texture=None, w=800, h=600):
         '''
         Initialise the framebuffer
         :param attachment: Which output of the rendering process to save (GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT, ...)
@@ -14,7 +14,8 @@ class Framebuffer:
         '''
         self.attachment = attachment
         self.fbo = glGenFramebuffers(1)
-
+        self.width = w
+        self.height = h
         if texture is not None:
             self.prepare(texture)
 
@@ -37,6 +38,9 @@ class Framebuffer:
 
         self.bind()
         glFramebufferTexture2D(GL_FRAMEBUFFER, self.attachment, target, texture.textureid, level)
+
+
+
         if self.attachment == GL_DEPTH_ATTACHMENT:
             glDrawBuffer(GL_NONE)
             glReadBuffer(GL_NONE)

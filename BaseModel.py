@@ -75,9 +75,9 @@ class BaseModel:
         #print('Initialising VBO for attribute {}'.format(name))
 
         if data is None:
-            print('(W) Warning in {}.bind_attribute(): Data array for attribute {} is None!'.format(
-                self.__class__.__name__, name))
-            return
+             # print('(W) Warning in {}.bind_attribute(): Data array for attribute {} is None!'.format(
+             #    self.__class__.__name__, name))
+             return
 
         # bind the location of the attribute in the GLSL program to the next index
         # the name of the location must correspond to a 'in' variable in the GLSL vertex shader code
@@ -152,8 +152,8 @@ class BaseModel:
 
         if self.visible:
 
-            if self.mesh.vertices is None:
-                print('(W) Warning in {}.draw(): No vertex array!'.format(self.__class__.__name__))
+            # if self.mesh.vertices is None:
+            #     print('(W) Warning in {}.draw(): No vertex array!'.format(self.__class__.__name__))
 
             # bind the Vertex Array Object so that all buffers are bound correctly and following operations affect them
             glBindVertexArray(self.vao)
@@ -165,7 +165,7 @@ class BaseModel:
                 M=np.matmul(Mp, self.M)
             )
 
-            #print('---> object {} rendered using shader {}'.format(self.name, self.shader.name))
+            # print('---> object {} rendered using shader {}'.format(self.name, self.shader.name))
 
             # bind all textures. Note that your shader needs to handle each one with a sampler object.
             for unit, tex in enumerate(self.mesh.textures):
@@ -214,9 +214,8 @@ class DrawModelFromMesh(BaseModel):
 
         elif self.mesh.faces.shape[1] == 4:
             self.primitive = GL_QUADS
-
-        else:
-            print('(E) Error in DrawModelFromObjFile.__init__(): index array must have 3 (triangles) or 4 (quads) columns, found {}!'.format(self.indices.shape[1]))
+        # else:
+        #     print('(E) Error in DrawModelFromObjFile.__init__(): index array must have 3 (triangles) or 4 (quads) columns, found {}!'.format(self.indices.shape[1]))
 
         self.bind()
 

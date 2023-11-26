@@ -11,5 +11,4 @@ Pl 1
 Ka 1 1 1
 Kd 1 1 1
 Ke 0 0 0
-norm normalMap1.png
-map_Ka ambientMap1.png
+map_Kd trex\Material_492.png

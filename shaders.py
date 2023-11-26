@@ -27,8 +27,8 @@ class Uniform:
         :param program: the GLSL program where the uniform is used
         '''
         self.location = glGetUniformLocation(program=program, name=self.name)
-        if self.location == -1:
-            print('(E) Warning, no uniform {}'.format(self.name))
+        # if self.location == -1:
+        #     print('(E) Warning, no uniform {}'.format(self.name))
 
     def bind_matrix(self, M=None, number=1, transpose=True):
         '''
@@ -60,8 +60,8 @@ class Uniform:
                 self.bind_vector()
             elif self.value.ndim==2:
                 self.bind_matrix()
-        else:
-            print('Wrong value bound: {}'.format(type(self.value)))
+        # else:
+        #     print('Wrong value bound: {}'.format(type(self.value)))
 
     def bind_int(self, value=None):
         if value is not None:
@@ -169,7 +169,7 @@ class BaseShaderProgram:
             #    shaders.compileShader(self.fragment_shader_source, shaders.GL_FRAGMENT_SHADER)
             #)
         except RuntimeError as error:
-            print('(E) An error occured while compiling {} shader:\n {}\n... forwarding exception...'.format(self.name, error)),
+            # print('(E) An error occured while compiling {} shader:\n {}\n... forwarding exception...'.format(self.name, error)),
             raise error
 
         self.bindAttributes(attributes)
@@ -290,8 +290,8 @@ class PhongShader(BaseShaderProgram):
         self.uniforms['Ns'].bind_float(material.Ns)
 
     def add_uniform(self, name):
-        if name in self.uniforms:
-            print('(W) Warning re-defining already existing uniform %s' % name)
+        # if name in self.uniforms:
+        #     print('(W) Warning re-defining already existing uniform %s' % name)
         self.uniforms[name] = Uniform(name)
 
     def unbind(self):

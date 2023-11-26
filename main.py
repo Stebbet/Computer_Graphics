@@ -51,22 +51,24 @@ class ExeterScene(Scene):
         # The ground and river
         self.groundlevel = -2
         floor = load_obj_file('models/scene.obj')
-        self.floor = [DrawModelFromMesh(scene=self,
+        self.river = DrawModelFromMesh(scene=self,
+                                       M=poseMatrix(position=[0, self.groundlevel, 0], orientation=[0,0,0], scale=.5),
+                                       mesh=floor[0], shader=TextureShader(), name='river')
+        self.floor_r = DrawModelFromMesh(scene=self,
                                        M=poseMatrix(position=[0, self.groundlevel, 0], orientation=[0, 0, 0],
-                                                    scale=[.5,.5,.5]),
-                                       mesh=mesh, shader=ShadowMappingShader(shadow_map=self.shadows), name='floor') for mesh in floor]
+                                                    scale=[.18,.5,.5]),
+                                       mesh=floor[1], shader=ShadowMappingShader(self.shadows), name='floor_r')
 
-        # Define the Pterodactyls
-        self.pterodactyl_scale = 4
-        pterodactyl = load_obj_file('models/pterodactyl.obj')
-        self.pterodactyl = DrawModelFromMesh(scene=self,
-                                        M=poseMatrix(), mesh=pterodactyl[0],
-                                        shader=ShadowMappingShader(shadow_map=self.shadows), name='pterodactyl')
+        self.floor_l = DrawModelFromMesh(scene=self,
+                                         M=poseMatrix(position=[0, self.groundlevel, 0], orientation=[0, 0, 0],
+                                                      scale=[.5, .5, .5]),
+                                         mesh=floor[2], shader=ShadowMappingShader(self.shadows), name='floor_l')
+
 
         helicopter = load_obj_file('models/helicopter.obj')
         self.helicopter = DrawModelFromMesh(scene=self,
                                              M=poseMatrix(), mesh=helicopter[0],
-                                             shader=ShadowMappingShader(shadow_map=self.shadows), name='helicopter')
+                                             shader=TextureShader(), name='helicopter')
 
         # Office
         office = load_obj_file('models/office.obj')
@@ -74,9 +76,9 @@ class ExeterScene(Scene):
                                         M=poseMatrix(position=[-0.3,-0.9,6.5], orientation=[0,radians(90),0], scale=8), mesh=mesh,
                                         shader=ShadowMappingShader(shadow_map=self.shadows), name='office') for mesh in office]
 
-
+        # Office next to the bridge
         self.office2 = [DrawModelFromMesh(scene=self,
-                                        M=poseMatrix(position=[-4, -0.9, -8], orientation=[0,radians(90),0], scale=8), mesh=mesh,
+                                        M=poseMatrix(position=[-5.5, -0.9, -8.2], orientation=[0,radians(90),0], scale=8), mesh=mesh,
                                         shader=ShadowMappingShader(shadow_map=self.shadows), name='office') for mesh in office]
 
         # Bridge Object
@@ -84,7 +86,7 @@ class ExeterScene(Scene):
         self.bridge = [DrawModelFromMesh(scene=self,
                                           M=poseMatrix(position=[-1, -1.4, -5], orientation=[0, 0, 0],
                                                        scale=9), mesh=mesh,
-                                          shader=ShadowMappingShader(shadow_map=self.shadows), name='office') for mesh in bridge]
+                                          shader=TextureShader(), name='office') for mesh in bridge]
 
         # Large buildings
         large_buildings = load_obj_file('models/large_buildings.obj')
@@ -93,10 +95,38 @@ class ExeterScene(Scene):
                                                   mesh=mesh, shader=ShadowMappingShader(shadow_map=self.shadows), name='large_buildings') for mesh in large_buildings]
 
         # Main skyscraper
-        skyscraper = load_obj_file('models/building1.obj')
+        skyscraper = np.array(load_obj_file('models/building1.obj'))
+        self.skyscraper_windows = DrawModelFromMesh(scene=self,
+                                             M=poseMatrix(position=[1.3, self.groundlevel - 0.5, 0], orientation=[0, 0, 0], scale=0.007),
+                                             mesh=skyscraper[1], shader=EnvironmentShader(map=self.environment, name='windows'), name='skyscraper_windows')
+
         self.skyscraper = [DrawModelFromMesh(scene=self,
-                                             M=poseMatrix(position=[1, self.groundlevel - 1, 0], orientation=[0, 0, 0], scale=0.007),
-                                             mesh=mesh, shader=ShadowMappingShader(self.shadows), name='skyscraper') for mesh in skyscraper]
+                                            M=poseMatrix(position=[1.3, self.groundlevel - 0.5, 0], orientation=[0, 0, 0], scale=0.007),
+                                            mesh=mesh, shader=ShadowMappingShader(shadow_map=self.shadows), name='skyscraper')
+                                            for mesh in skyscraper[np.r_[0, 2]]]
+
+        # Skyscraper right of main skyscraper
+        skyscraper2 = load_obj_file('models/skyscraper2.obj')
+        self.skyscraper2 = [DrawModelFromMesh(scene=self,
+                                             M=poseMatrix(position=[.5, -0.3, 0], orientation=[0, 0, 0],
+                                                          scale=15),
+                                             mesh=mesh, shader=ShadowMappingShader(self.shadows), name='skyscraper')
+                                            for mesh in skyscraper2]
+
+        # Capitol building in front of main skyscraper
+        capitol = load_obj_file('models/capitol.obj')
+        self.capitol = [DrawModelFromMesh(scene=self,
+                                             M=poseMatrix(position=[-.4, .7, 1.5], orientation=[0, radians(90), 0],
+                                                          scale=10),
+                                             mesh=mesh, shader=TextureShader(), name='skyscraper')
+                                            for mesh in capitol]
+
+        stadium = load_obj_file('models/stadium.obj')
+        self.stadium = [DrawModelFromMesh(scene=self,
+                                             M=poseMatrix(position=[5, -1 , -17], orientation=[0, 0, 0],
+                                                          scale=12),
+                                             mesh=mesh, shader=TextureShader(), name='stadium')
+                                            for mesh in stadium]
 
         # London Wheel
         wheel = load_obj_file('models/wheel2.obj')
@@ -104,6 +134,25 @@ class ExeterScene(Scene):
                                         M=poseMatrix(position=[-4, self.groundlevel, 0], orientation=[0, 0, 0], scale=0.003),
                                         mesh=mesh, shader=ShadowMappingShader(shadow_map=self.shadows),
                                         name='skyscraper') for mesh in wheel]
+
+        #  --------------------------- Dinosaurs ---------------------------- #
+
+        # Pterodactyl
+        self.pterodactyl_scale = 4
+        pterodactyl = load_obj_file('models/pterodactyl.obj')
+        self.pterodactyl = DrawModelFromMesh(scene=self,
+                                             M=poseMatrix(), mesh=pterodactyl[0],
+                                             shader=ShadowMappingShader(shadow_map=self.shadows), name='pterodactyl')
+
+        trex1 = load_obj_file('models/trex.obj')
+        self.trex =  DrawModelFromMesh(scene=self,
+                                             M=poseMatrix(position=[7, -1.4 , -6], orientation=[0,radians(210),0], scale=7), mesh=trex1[0],
+                                             shader=TextureShader(), name='trex1')
+
+        apataosaurus = load_obj_file('models/apatosaurus.obj')
+        self.apatosaurus = DrawModelFromMesh(scene=self,
+                                             M=poseMatrix(position=[-6.4, -.3, -9], orientation=[0,radians(100),0], scale=10), mesh=apataosaurus[0],
+                                             shader=TextureShader(), name='apatosaurus')
 
         # environment box for reflections
         # self.envbox = EnvironmentBox(scene=self)
@@ -126,6 +175,11 @@ class ExeterScene(Scene):
 
     def draw_reflections(self):
         self.skybox.draw()
+        self.river.draw()
+        for model in self.stadium:
+            model.draw()
+        for model in self.capitol:
+            model.draw()
 
     def draw(self, framebuffer=False):
         '''
@@ -142,6 +196,9 @@ class ExeterScene(Scene):
         # first, we draw the skybox
         self.skybox.draw()
 
+        # Draw reflections
+       # self.draw_reflections()
+
         # Draw the animations
         self.animations()
 
@@ -157,9 +214,8 @@ class ExeterScene(Scene):
             # self.environment.update(self)
             # self.envbox.draw()
 
-            # self.environment.update(self)
-            for model in self.floor:
-                model.draw()
+            self.environment.update(self)
+
             for model in self.skyscraper:
                 model.draw()
             for model in self.large_buildings:
@@ -172,16 +228,27 @@ class ExeterScene(Scene):
                 model.draw()
             for model in self.bridge:
                 model.draw()
+            for model in self.skyscraper2:
+                model.draw()
+            for model in self.stadium:
+                model.draw()
+            for model in self.capitol:
+                model.draw()
 
+            self.river.draw()
+            self.floor_l.draw()
+            self.floor_r.draw()
             self.pterodactyl.draw()
             self.helicopter.draw()
+            self.skyscraper_windows.draw()
+
+            self.trex.draw()
+            self.apatosaurus.draw()
 
             self.flattened_cube.draw()
             self.show_shadow_map.draw()
 
-
-        # then we loop over all models in the list and draw them
-
+        self.show_light.draw()
 
         # once we are done drawing, we display the scene
         # Note that here we use double buffering to avoid artefacts:
@@ -207,7 +274,7 @@ class ExeterScene(Scene):
         self.dt += 0.01
         xpos = 2 * sin(self.dt)
         zpos = 2 * cos(self.dt)
-
+        self.show_light.position = self.light.position
         self.pterodactyl.M = poseMatrix(position=[xpos, 0.3 * sin(self.dt) + 3, zpos],
                                    orientation=[0.3 * sin(self.dt), radians(90) + self.dt, radians(20)], scale=self.pterodactyl_scale)
 
@@ -226,6 +293,7 @@ if __name__ == '__main__':
 #TODO:
 #  - Find a model for the river - DONE
 #  - Design and complete the scene
+#  - Add own uniform and move the water texture?
 #  - Rampaging Trex into Trex animation maybe
 #  - Fire breathing Pterodactyl
 #  - Comment everything better

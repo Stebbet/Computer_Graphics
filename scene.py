@@ -6,7 +6,6 @@ from OpenGL.GL import *
 
 # import the shader class
 from shaders import *
-
 # import the camera class
 from camera import Camera
 
@@ -49,6 +48,8 @@ class Scene:
 
         # enable the vertex array capability
         glEnableClientState(GL_VERTEX_ARRAY)
+
+        # Enable MSAA anti-aliasing
 
         # enable depth test for clean output (see lecture on clipping & visibility for an explanation
         glEnable(GL_DEPTH_TEST)

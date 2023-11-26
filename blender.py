@@ -88,7 +88,6 @@ def process_line(line):
 		return v
 
 	else:
-		print('(E) Unknown line: {}'.format(fields))
 		return None
 
 	return (label, [float(token) for token in fields[1:]])
@@ -98,7 +97,7 @@ def load_material_library(file_name):
 	library = MaterialLibrary()
 	material = None
 
-	print('-- Loading material library {}'.format(file_name))
+	#print('-- Loading material library {}'.format(file_name))
 
 	mtlfile = open(file_name)
 	for line in mtlfile:
@@ -129,7 +128,7 @@ def load_material_library(file_name):
 
 	library.add_material(material)
 
-	print('- Done, loaded {} materials'.format(len(library.materials)))
+	#print('- Done, loaded {} materials'.format(len(library.materials)))
 
 	return library
 
@@ -139,7 +138,7 @@ def load_obj_file(file_name):
 	Function for loading a Blender3D object file. minimalistic, and partial,
 	but sufficient for this course. You do not really need to worry about it.
 	'''
-	print('Loading mesh(es) from Blender file: {}'.format(file_name))
+	#print('Loading mesh(es) from Blender file: {}'.format(file_name))
 
 	vlist = []	# list of vertices
 	tlist = []	# list of texture vectors
@@ -246,7 +245,7 @@ def create_meshes_from_blender(vlist, flist, mlist, tlist, library, mesh_list, l
 	try:
 		meshes.append(create_mesh(varray, tarray, flist, fstart, len(flist), library, material))
 	except:
-		print('(W) could not load mesh!')
+		#print('(W) could not load mesh!')
 		raise
 
 	# print('--- Created {} mesh(es) from Blender file.'.format(len(meshes)))
@@ -286,7 +285,7 @@ def fix_blender_textures(textures, faces, vertices):
 	# (OpenGL, unlike Blender, does not allow for multiple indexing!)
 
 	if faces.shape[2] == 1:
-		print('(W) No texture indices provided, setting texture coordinate array as None!')
+		# print('(W) No texture indices provided, setting texture coordinate array as None!')
 		return None
 
 	new_textures = np.zeros((vertices.shape[0], 2), dtype='f')
