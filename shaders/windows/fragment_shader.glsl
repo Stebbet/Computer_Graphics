@@ -15,6 +15,9 @@ void main(void)
 {
 	vec3 normal_view_space_normalized = normalize(normal_view_space);
 	vec3 reflected = reflect(normalize(position_view_space), normal_view_space_normalized);
+
+    reflected.y *= -1;
+
     vec4 colour_multiplier;
     colour_multiplier.x = 0.66;
     colour_multiplier.y = 0.94;

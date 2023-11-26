@@ -26,7 +26,10 @@ class ExeterScene(Scene):
     def __init__(self):
         Scene.__init__(self)
         self.dt = 0.
-        self.light = LightSource(self, position=[-3., 9, 3.], Ia=[0.6,0.6,0.6], Id=[.6,139/500,147/500], Is=[.5,139/500,147/500])
+        self.fire_timer = 0
+        self.fire_on = True
+
+        self.light = LightSource(self, position=[-20, 50, 5], Ia=[0.6,0.6,0.6], Id=[.6,139/500,147/500], Is=[.5,139/500,147/500])
 
         self.shaders = 'phong'
 
@@ -53,7 +56,7 @@ class ExeterScene(Scene):
         floor = load_obj_file('models/scene.obj')
         self.river = DrawModelFromMesh(scene=self,
                                        M=poseMatrix(position=[0, self.groundlevel, 0], orientation=[0,0,0], scale=.5),
-                                       mesh=floor[0], shader=TextureShader(), name='river')
+                                       mesh=floor[0], shader=ShadowMappingShader(self.shadows), name='river')
         self.floor_r = DrawModelFromMesh(scene=self,
                                        M=poseMatrix(position=[0, self.groundlevel, 0], orientation=[0, 0, 0],
                                                     scale=[.18,.5,.5]),
@@ -73,12 +76,12 @@ class ExeterScene(Scene):
         # Office
         office = load_obj_file('models/office.obj')
         self.office = [DrawModelFromMesh(scene=self,
-                                        M=poseMatrix(position=[-0.3,-0.9,6.5], orientation=[0,radians(90),0], scale=8), mesh=mesh,
+                                        M=poseMatrix(position=[-0.3,-0.8,6], orientation=[0,radians(90),0], scale=9), mesh=mesh,
                                         shader=ShadowMappingShader(shadow_map=self.shadows), name='office') for mesh in office]
 
         # Office next to the bridge
         self.office2 = [DrawModelFromMesh(scene=self,
-                                        M=poseMatrix(position=[-5.5, -0.9, -8.2], orientation=[0,radians(90),0], scale=8), mesh=mesh,
+                                        M=poseMatrix(position=[-6, -0.9, -9], orientation=[0,radians(90),0], scale=[9, 9, 11]), mesh=mesh,
                                         shader=ShadowMappingShader(shadow_map=self.shadows), name='office') for mesh in office]
 
         # Bridge Object
@@ -91,7 +94,7 @@ class ExeterScene(Scene):
         # Large buildings
         large_buildings = load_obj_file('models/large_buildings.obj')
         self.large_buildings = [DrawModelFromMesh(scene=self,
-                                                  M=poseMatrix(position=[-6, self.groundlevel - .15, 7], orientation=[0, radians(90), 0], scale=16),
+                                                  M=poseMatrix(position=[-6.1, self.groundlevel - .15, 6.85], orientation=[0, radians(90), 0], scale=18),
                                                   mesh=mesh, shader=ShadowMappingShader(shadow_map=self.shadows), name='large_buildings') for mesh in large_buildings]
 
         # Main skyscraper
@@ -108,7 +111,7 @@ class ExeterScene(Scene):
         # Skyscraper right of main skyscraper
         skyscraper2 = load_obj_file('models/skyscraper2.obj')
         self.skyscraper2 = [DrawModelFromMesh(scene=self,
-                                             M=poseMatrix(position=[.5, -0.3, 0], orientation=[0, 0, 0],
+                                             M=poseMatrix(position=[1.5, -0.3, 2], orientation=[0, 0, 0],
                                                           scale=15),
                                              mesh=mesh, shader=ShadowMappingShader(self.shadows), name='skyscraper')
                                             for mesh in skyscraper2]
@@ -116,7 +119,7 @@ class ExeterScene(Scene):
         # Capitol building in front of main skyscraper
         capitol = load_obj_file('models/capitol.obj')
         self.capitol = [DrawModelFromMesh(scene=self,
-                                             M=poseMatrix(position=[-.4, .7, 1.5], orientation=[0, radians(90), 0],
+                                             M=poseMatrix(position=[-.35, 1, 1.2], orientation=[0, radians(90), 0],
                                                           scale=10),
                                              mesh=mesh, shader=TextureShader(), name='skyscraper')
                                             for mesh in capitol]
@@ -135,10 +138,31 @@ class ExeterScene(Scene):
                                         mesh=mesh, shader=ShadowMappingShader(shadow_map=self.shadows),
                                         name='skyscraper') for mesh in wheel]
 
+        terrace = load_obj_file('models/appart3.obj')
+        self.terrace = [[DrawModelFromMesh(scene=self,
+                                           M=poseMatrix(position=[7, -.3, zpos], orientation=[0,radians(-90), 0], scale=5),
+                         mesh=mesh, shader=ShadowMappingShader(shadow_map=self.shadows)) for mesh in terrace] for zpos in range(3,12)]
+
+        self.terrace2 = [[DrawModelFromMesh(scene=self,
+                                           M=poseMatrix(position=[7, -.3, zpos2 - .7], orientation=[0, radians(90), 0],
+                                                        scale=5),
+                                           mesh=mesh, shader=ShadowMappingShader(shadow_map=self.shadows)) for mesh in
+                         terrace] for zpos2 in range(1, 10)]
+
+        firestation = load_obj_file('models/firestation.obj')
+        self.firestation = DrawModelFromMesh(scene=self,
+                                             M=poseMatrix(position=[-10, -4.3, -11.5], orientation=[0,0,0], scale=[14,12,12]), mesh=firestation[0],
+                                             shader=TextureShader(), name='firestation')
+
+        factory = load_obj_file('models/factory.obj')
+        self.factory = DrawModelFromMesh(scene=self,
+                                             M=poseMatrix(position=[-13, -.2, 4.5], orientation=[0,radians(90),0], scale=10), mesh=factory[0],
+                                             shader=ShadowMappingShader(shadow_map=self.shadows), name='factory')
+
         #  --------------------------- Dinosaurs ---------------------------- #
 
         # Pterodactyl
-        self.pterodactyl_scale = 4
+        self.pterodactyl_scale = 6
         pterodactyl = load_obj_file('models/pterodactyl.obj')
         self.pterodactyl = DrawModelFromMesh(scene=self,
                                              M=poseMatrix(), mesh=pterodactyl[0],
@@ -153,6 +177,22 @@ class ExeterScene(Scene):
         self.apatosaurus = DrawModelFromMesh(scene=self,
                                              M=poseMatrix(position=[-6.4, -.3, -9], orientation=[0,radians(100),0], scale=10), mesh=apataosaurus[0],
                                              shader=TextureShader(), name='apatosaurus')
+        self.apatosaurus2 = DrawModelFromMesh(scene=self,
+                                             M=poseMatrix(position=[13, .2, -1.3], orientation=[0, 0, 0],
+                                                          scale=14), mesh=apataosaurus[0],
+                                             shader=TextureShader(), name='apatosaurus2')
+
+        fire = load_obj_file('models/fire.obj')
+        self.fire = DrawModelFromMesh(scene=self,
+                                             M=poseMatrix(position=[3.1, -.8, -3.5], orientation=[radians(-30), radians(220), radians(0)],
+                                                          scale=3), mesh=fire[0],
+                                             shader=TextureShader(), name='fire')
+
+        monkey = load_obj_file('models/monkey.obj')
+        self.monkey = DrawModelFromMesh(scene=self,
+                                        M=poseMatrix(position=[1.2, 7.6, 0],
+                                                       orientation=[0,radians(-50),0],
+                                                       scale=1), mesh=monkey[0], shader=ShadowMappingShader(shadow_map=self.shadows), name='monkey')
 
         # environment box for reflections
         # self.envbox = EnvironmentBox(scene=self)
@@ -170,12 +210,20 @@ class ExeterScene(Scene):
             model.draw()
         for model in self.bridge:
             model.draw()
+        self.factory.draw()
+        self.firestation.draw()
+        for i in self.terrace:
+            for model in i:
+                model.draw()
         self.pterodactyl.draw()
         self.helicopter.draw()
+        self.monkey.draw()
 
     def draw_reflections(self):
         self.skybox.draw()
         self.river.draw()
+        self.floor_r.draw()
+        self.floor_l.draw()
         for model in self.stadium:
             model.draw()
         for model in self.capitol:
@@ -234,6 +282,12 @@ class ExeterScene(Scene):
                 model.draw()
             for model in self.capitol:
                 model.draw()
+            for i in self.terrace:
+                for model in i:
+                    model.draw()
+            for i in self.terrace2:
+                for model in i:
+                    model.draw()
 
             self.river.draw()
             self.floor_l.draw()
@@ -241,14 +295,18 @@ class ExeterScene(Scene):
             self.pterodactyl.draw()
             self.helicopter.draw()
             self.skyscraper_windows.draw()
-
+            self.firestation.draw()
+            self.factory.draw()
             self.trex.draw()
             self.apatosaurus.draw()
+            self.apatosaurus2.draw()
+            self.monkey.draw()
+
 
             self.flattened_cube.draw()
             self.show_shadow_map.draw()
+            self.fire.draw()
 
-        self.show_light.draw()
 
         # once we are done drawing, we display the scene
         # Note that here we use double buffering to avoid artefacts:
@@ -257,30 +315,24 @@ class ExeterScene(Scene):
         if not framebuffer:
             pygame.display.flip()
 
-    def keyboard(self, event):
-        '''
-        Process additional keyboard events for this demo.
-        '''
-        Scene.keyboard(self, event)
-
-        if event.key == pygame.K_1:
-            print('--> using shadows shading')
-            if self.draw_shadows:
-                self.draw_shadows = False
-            else:
-                self.draw_shadows = True
-
     def animations(self):
         self.dt += 0.01
+        self.fire_timer += 0.01
+
         xpos = 2 * sin(self.dt)
         zpos = 2 * cos(self.dt)
-        self.show_light.position = self.light.position
+
         self.pterodactyl.M = poseMatrix(position=[xpos, 0.3 * sin(self.dt) + 3, zpos],
                                    orientation=[0.3 * sin(self.dt), radians(90) + self.dt, radians(20)], scale=self.pterodactyl_scale)
 
         self.helicopter.M = poseMatrix(position=[-xpos, 0.3 * sin(self.dt) + 4, -zpos],
                                         orientation=[-0.3 * sin(self.dt), radians(-90) + self.dt, radians(20)],
                                         scale=4)
+
+        if self.fire_timer >= 0.4:
+            self.fire.visible = not self.fire.visible
+            self.fire_timer = 0
+
 
 if __name__ == '__main__':
     # initialises the scene object
@@ -291,7 +343,7 @@ if __name__ == '__main__':
     scene.run()
 
 #TODO:
-#  - Find a model for the river - DONE
+#  - Left floor extends out of the skybox
 #  - Design and complete the scene
 #  - Add own uniform and move the water texture?
 #  - Rampaging Trex into Trex animation maybe
