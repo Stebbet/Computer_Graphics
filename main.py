@@ -50,21 +50,21 @@ class ExeterScene(Scene):
         # self.sphere = DrawModelFromMesh(scene=self, M=poseMatrix(), mesh=Sphere(), shader=EnvironmentShader(map=self.environment))
         # self.sphere = DrawModelFromMesh(scene=self, M=poseMatrix(), mesh=Sphere(), shader=FlatShader())
 
-
         # The ground and river
         self.groundlevel = -2
         floor = load_obj_file('models/scene.obj')
         self.river = DrawModelFromMesh(scene=self,
                                        M=poseMatrix(position=[0, self.groundlevel, 0], orientation=[0,0,0], scale=.5),
                                        mesh=floor[0], shader=ShadowMappingShader(self.shadows), name='river')
+
         self.floor_r = DrawModelFromMesh(scene=self,
                                        M=poseMatrix(position=[0, self.groundlevel, 0], orientation=[0, 0, 0],
                                                     scale=[.18,.5,.5]),
                                        mesh=floor[1], shader=ShadowMappingShader(self.shadows), name='floor_r')
 
         self.floor_l = DrawModelFromMesh(scene=self,
-                                         M=poseMatrix(position=[0, self.groundlevel, 0], orientation=[0, 0, 0],
-                                                      scale=[.5, .5, .5]),
+                                         M=poseMatrix(position=[-.4, self.groundlevel, 0], orientation=[0, 0, 0],
+                                                      scale=[.4, .5, .5]),
                                          mesh=floor[2], shader=ShadowMappingShader(self.shadows), name='floor_l')
 
 
@@ -151,12 +151,12 @@ class ExeterScene(Scene):
 
         firestation = load_obj_file('models/firestation.obj')
         self.firestation = DrawModelFromMesh(scene=self,
-                                             M=poseMatrix(position=[-10, -4.3, -11.5], orientation=[0,0,0], scale=[14,12,12]), mesh=firestation[0],
+                                             M=poseMatrix(position=[-7.5, -4, -12], orientation=[0,0,0], scale=[12,10,10]), mesh=firestation[0],
                                              shader=TextureShader(), name='firestation')
 
         factory = load_obj_file('models/factory.obj')
         self.factory = DrawModelFromMesh(scene=self,
-                                             M=poseMatrix(position=[-13, -.2, 4.5], orientation=[0,radians(90),0], scale=10), mesh=factory[0],
+                                             M=poseMatrix(position=[-12, -.5, 4.5], orientation=[0,radians(90),0], scale=[7,9,9]), mesh=factory[0],
                                              shader=ShadowMappingShader(shadow_map=self.shadows), name='factory')
 
         #  --------------------------- Dinosaurs ---------------------------- #
@@ -193,6 +193,34 @@ class ExeterScene(Scene):
                                         M=poseMatrix(position=[1.2, 7.6, 0],
                                                        orientation=[0,radians(-50),0],
                                                        scale=1), mesh=monkey[0], shader=ShadowMappingShader(shadow_map=self.shadows), name='monkey')
+
+        triceratops = load_obj_file('models/triceratops.obj')
+        self.triceratops = DrawModelFromMesh(scene=self,
+                                        M=poseMatrix(position=[-6, -2.2, -3], orientation=[0, radians(-50), 0],
+                                                     scale=5), mesh=triceratops[0],
+                                        shader=ShadowMappingShader(self.shadows), name='triceratops')
+
+        self.triceratops2 = DrawModelFromMesh(scene=self,
+                                             M=poseMatrix(position=[-4, -2.4, -9.5], orientation=[0, radians(-70), 0],
+                                                          scale=8), mesh=triceratops[0],
+                                             shader=ShadowMappingShader(self.shadows), name='triceratops')
+
+        velociraptor = load_obj_file('models/velociraptor.obj')
+        self.velociraptor = DrawModelFromMesh(scene=self,
+                                        M=poseMatrix(position=[-5, -2, -1], orientation=[0, radians(50), 0],
+                                                     scale=4), mesh=velociraptor[0],
+                                        shader=TextureShader(), name='velociraptor')
+
+        self.velociraptor2 = DrawModelFromMesh(scene=self,
+                                              M=poseMatrix(position=[-8, -2.4, -3], orientation=[0, radians(10), 0],
+                                                           scale=6), mesh=velociraptor[0],
+                                              shader=TextureShader(), name='velociraptor')
+
+        # By the flaming trex
+        self.velociraptor3 = DrawModelFromMesh(scene=self,
+                                               M=poseMatrix(position=[2.2, -2.3, -10], orientation=[0, radians(-100), 0],
+                                                            scale=8), mesh=velociraptor[0],
+                                               shader=TextureShader(), name='velociraptor')
 
         # environment box for reflections
         # self.envbox = EnvironmentBox(scene=self)
@@ -301,7 +329,11 @@ class ExeterScene(Scene):
             self.apatosaurus.draw()
             self.apatosaurus2.draw()
             self.monkey.draw()
-
+            self.velociraptor.draw()
+            self.velociraptor2.draw()
+            self.velociraptor3.draw()
+            self.triceratops.draw()
+            self.triceratops2.draw()
 
             self.flattened_cube.draw()
             self.show_shadow_map.draw()
@@ -322,6 +354,7 @@ class ExeterScene(Scene):
         xpos = 2 * sin(self.dt)
         zpos = 2 * cos(self.dt)
 
+        # rotations of the pterodactyl and the helicopter in the sky
         self.pterodactyl.M = poseMatrix(position=[xpos, 0.3 * sin(self.dt) + 3, zpos],
                                    orientation=[0.3 * sin(self.dt), radians(90) + self.dt, radians(20)], scale=self.pterodactyl_scale)
 
@@ -329,7 +362,8 @@ class ExeterScene(Scene):
                                         orientation=[-0.3 * sin(self.dt), radians(-90) + self.dt, radians(20)],
                                         scale=4)
 
-        if self.fire_timer >= 0.4:
+        # timere for the fire-breathing trex
+        if self.fire_timer >= 0.3:
             self.fire.visible = not self.fire.visible
             self.fire_timer = 0
 
@@ -343,9 +377,4 @@ if __name__ == '__main__':
     scene.run()
 
 #TODO:
-#  - Left floor extends out of the skybox
-#  - Design and complete the scene
-#  - Add own uniform and move the water texture?
-#  - Rampaging Trex into Trex animation maybe
-#  - Fire breathing Pterodactyl
 #  - Comment everything better
