@@ -37,8 +37,6 @@ class Texture:
 
         self.textureid = glGenTextures(1)
 
-        # print('* Loading texture {} at ID {}'.format('./textures/{}'.format(name), self.textureid))
-
         self.bind()
 
         if img is None:
@@ -52,11 +50,11 @@ class Texture:
 
 
         # set what happens for texture coordinates outside [0,1]
-        glTexParameteri(self.target, GL_TEXTURE_WRAP_S, wrap)
+        glTexParameteri(self.target, GL_TEXTURE_WRAP_S, wrap)  # GL_REPEAT
         glTexParameteri(self.target, GL_TEXTURE_WRAP_T, wrap)
 
         # set how sampling from the texture is done.
-        glTexParameteri(self.target, GL_TEXTURE_MAG_FILTER, sample)
+        glTexParameteri(self.target, GL_TEXTURE_MAG_FILTER, sample)  # GL_NEAREST
         glTexParameteri(self.target, GL_TEXTURE_MIN_FILTER, sample)
 
         self.unbind()

@@ -21,10 +21,8 @@ uniform mat3 VMiT;
 
 void main(){
     // 1. first, we transform the position using PVM matrix.
-    // note that gl_Position is a standard output of the
-    // vertex shader.
+    // gl_Position is a standard output of the vertex shader.
     gl_Position = PVM * vec4(position, 1.0f);
-
 
     // 2. forward the texture coordinates.
     fragment_texCoord = texCoord;

@@ -23,7 +23,7 @@ class FlattenCubeMap(DrawModelFromMesh):
 
     def __init__(self, scene, cube=None):
         '''
-        Initialises the
+        Initialises the flattened cube map class
         :param scene: The scene object.
         :param cube: [optional] if not None, the cubemap texture to draw (can be set at a later stage using the set() method)
         '''
@@ -145,11 +145,11 @@ class CubeMap(Texture):
         # This dictionary contains the file name for each face, if loading from disk (otherwise ignored)
         self.files = {
             GL_TEXTURE_CUBE_MAP_NEGATIVE_X: 'left.bmp',
-            GL_TEXTURE_CUBE_MAP_POSITIVE_Z: 'back.bmp',
             GL_TEXTURE_CUBE_MAP_POSITIVE_X: 'right.bmp',
-            GL_TEXTURE_CUBE_MAP_NEGATIVE_Z: 'front.bmp',
-            GL_TEXTURE_CUBE_MAP_POSITIVE_Y: 'bottom.bmp',
             GL_TEXTURE_CUBE_MAP_NEGATIVE_Y: 'top.bmp',
+            GL_TEXTURE_CUBE_MAP_POSITIVE_Y: 'bottom.bmp',
+            GL_TEXTURE_CUBE_MAP_NEGATIVE_Z: 'front.bmp',
+            GL_TEXTURE_CUBE_MAP_POSITIVE_Z: 'back.bmp',
         }
 
         # generate the texture.

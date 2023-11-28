@@ -23,7 +23,7 @@ void main(void)
     colour_multiplier.y = 0.94;
     colour_multiplier.z = 0.985;
     colour_multiplier.w = 0;
-	final_color = colour_multiplier * texture(sampler_cube, normalize(VT*reflected));
+	final_color = colour_multiplier * texture(sampler_cube, normalize(reflect(VT*reflected, vec3(1,0,0))));
 	//final_color = texture(sampler_cube, normalize(reflected));
 
 

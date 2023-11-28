@@ -9,5 +9,10 @@ Pds 1
 Pl 1
 Ka 1 1 1
 Kd 1 1 1
-Ke 0 0 0
+Ks 1 1 1
 map_Kd monkey/Material_49.png
+
+# map_Ka
+# map_Ks
+# bump
+# norm

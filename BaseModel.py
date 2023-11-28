@@ -44,60 +44,46 @@ class BaseModel:
 
         # mesh data
         self.mesh = mesh
-        if self.mesh.textures == 1:
-            self.mesh.textures.append(Texture('lena.bmp'))
 
         self.name = self.mesh.name
-        #self.vertices = None
-        #self.indices = None
-        #self.normals = None
-        #self.vertex_colors = None
-        #self.textureCoords = None
-        #self.textures = []
 
-
-        # dict of VBOs
+        # Dictionary of VBOs
         self.vbos = {}
 
-        # dict of attributes
+        # Dictionary of attributes
         self.attributes = {}
 
-        # store the position of the model in the scene, ...
+        # Store the position of the model in the scene
         self.M = M
 
-        # We use a Vertex Array Object to pack all buffers for rendering in the GPU (see lecture on OpenGL)
+        # Use a Vertex Array Object to pack all buffers for rendering in the GPU
         self.vao = glGenVertexArrays(1)
 
-        # this buffer will be used to store indices, if using shared vertex representation
+        # This buffer will be used to store indices, if using shared vertex representation
         self.index_buffer = None
 
     def initialise_vbo(self, name, data):
-        #print('Initialising VBO for attribute {}'.format(name))
-
+        # Initialising VBO for attribute
         if data is None:
-             # print('(W) Warning in {}.bind_attribute(): Data array for attribute {} is None!'.format(
-             #    self.__class__.__name__, name))
-             return
+            return
 
-        # bind the location of the attribute in the GLSL program to the next index
+        # Bind the location of the attribute in the GLSL program to the next index
         # the name of the location must correspond to a 'in' variable in the GLSL vertex shader code
         self.attributes[name] = len(self.vbos)
 
-        # create a buffer object...
+        # create a buffer object and bind it
         self.vbos[name] = glGenBuffers(1)
-        # and bind it
         glBindBuffer(GL_ARRAY_BUFFER, self.vbos[name])
 
         # enable the attribute
         glEnableVertexAttribArray(self.attributes[name])
 
         # Associate the bound buffer to the corresponding input location in the shader
-        # Each instance of the vertex shader will get one row of the array
-        # so this can be processed in parallel!
+        # Each instance of the vertex shader will get one row of the array so this can be processed in parallel!
         glVertexAttribPointer(index=self.attributes[name], size=data.shape[1], type=GL_FLOAT, normalized=False,
                               stride=0, pointer=None)
 
-        # ... and we set the data in the buffer as the vertex array
+        # Set the data in the buffer as the vertex array
         glBufferData(GL_ARRAY_BUFFER, data, GL_STATIC_DRAW)
 
     def bind_shader(self, shader):
@@ -115,8 +101,7 @@ class BaseModel:
 
     def bind(self):
         '''
-        This method stores the vertex data in a Vertex Buffer Object (VBO) that can be uploaded
-        to the GPU at render time.
+        This method stores the vertex data in a Vertex Buffer Object (VBO) that can be uploaded to the GPU at render time.
         '''
 
         # bind the VAO to retrieve all buffers and rendering context
@@ -125,7 +110,7 @@ class BaseModel:
         if self.mesh.vertices is None:
             print('(W) Warning in {}.bind(): No vertex array!'.format(self.__class__.__name__))
         else:
-        # initialise vertex position VBO and link to shader program attribute
+            # initialise vertex position VBO and link to shader program attribute
             self.initialise_vbo('position', self.mesh.vertices)
             self.initialise_vbo('normal', self.mesh.normals)
             self.initialise_vbo('color', self.mesh.colors)
@@ -147,13 +132,9 @@ class BaseModel:
         '''
         Draws the model using OpenGL functions.
         :param Mp: The model matrix of the parent object, for composite objects.
-        :param shaders: the shader program to use for drawing
         '''
 
         if self.visible:
-
-            # if self.mesh.vertices is None:
-            #     print('(W) Warning in {}.draw(): No vertex array!'.format(self.__class__.__name__))
 
             # bind the Vertex Array Object so that all buffers are bound correctly and following operations affect them
             glBindVertexArray(self.vao)
@@ -165,17 +146,15 @@ class BaseModel:
                 M=np.matmul(Mp, self.M)
             )
 
-            # print('---> object {} rendered using shader {}'.format(self.name, self.shader.name))
-
             # bind all textures. Note that your shader needs to handle each one with a sampler object.
             for unit, tex in enumerate(self.mesh.textures):
                 glActiveTexture(GL_TEXTURE0 + unit)
-                tex.bind()
+                tex.bind()  # Bind automatically unbinds the previous bind so no need to call tex.unbind()
 
             # check whether the data is stored as vertex array or index array
             if self.mesh.faces is not None:
                 # draw the data in the buffer using the index array
-                glDrawElements(self.primitive, self.mesh.faces.flatten().shape[0], GL_UNSIGNED_INT, None )
+                glDrawElements(self.primitive, self.mesh.faces.flatten().shape[0], GL_UNSIGNED_INT, None)
             else:
                 # draw the data in the buffer using the vertex array ordering only.
                 glDrawArrays(self.primitive, 0, self.mesh.vertices.shape[0])
@@ -190,7 +169,7 @@ class BaseModel:
         for vbo in self.vbos.items():
             glDeleteBuffers(1, vbo)
 
-        glDeleteVertexArrays(1,self.vao.tolist())
+        glDeleteVertexArrays(1, self.vao.tolist())
 
 
 class DrawModelFromMesh(BaseModel):
@@ -214,8 +193,6 @@ class DrawModelFromMesh(BaseModel):
 
         elif self.mesh.faces.shape[1] == 4:
             self.primitive = GL_QUADS
-        # else:
-        #     print('(E) Error in DrawModelFromObjFile.__init__(): index array must have 3 (triangles) or 4 (quads) columns, found {}!'.format(self.indices.shape[1]))
 
         self.bind()
 

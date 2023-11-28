@@ -7,7 +7,7 @@ class LightSource:
     source position easily.
     '''
 
-    def __init__(self, scene, position=[2., 2., 0.], Ia=[0.2, 0.2, 0.2], Id=[0.6, 0.6, 0.6], Is=[1., 1., 1.]):
+    def __init__(self, scene, position=[2., 2., 0.], Ia=[0.2, 0.2, 0.2], Id=[0.9, 0.9, 0.9], Is=[1., 1., 1.]):
         '''
         :param scene: The scene in which the light source exists.
         :param position: the position of the light source

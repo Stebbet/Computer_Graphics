@@ -55,7 +55,7 @@ class Scene:
         glEnable(GL_DEPTH_TEST)
 
         # set the default shader program (can be set on a per-mesh basis)
-        self.shaders = 'flat'
+        self.shaders = 'phong'
 
         # initialise the projective transform
         near = 1.0
@@ -91,7 +91,7 @@ class Scene:
         '''
 
         # bind the default shader to the mesh
-        #model.bind_shader(self.shaders)
+        # model.bind_shader(self.shaders)
 
         # and add to the list
         self.models.append(model)
@@ -118,14 +118,6 @@ class Scene:
             # ensure that the camera view matrix is up to date
             self.camera.update()
 
-        # then we loop over all models in the list and draw them
-        for model in self.models:
-            model.draw()
-
-        # once we are done drawing, we display the scene
-        # Note that here we use double buffering to avoid artefacts:
-        # we draw on a different buffer than the one we display,
-        # and flip the two buffers once we are done drawing.
         if not framebuffer:
             pygame.display.flip()
 
@@ -163,45 +155,45 @@ class Scene:
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mods = pygame.key.get_mods()
+
+                # Events for the scroll wheel
                 if event.button == 4:
-                    #pass
-                    #TODO: WS2
                     if mods & pygame.KMOD_CTRL:
+                        # Rotate the light source
                         self.light.position *= 1.1
                         self.light.update()
-                        self.light2.position *= 1.1
-                        self.light2.update()
                     else:
+                        # Zoom the camera in
                         self.camera.distance = max(1, self.camera.distance - 1)
 
                 elif event.button == 5:
-                    #pass
-                    #TODO: WS2
                     if mods & pygame.KMOD_CTRL:
+                        # Rotate the light source
                         self.light.position *= 0.9
                         self.light.update()
-                        self.light2.position *= 0.9
-                        self.light2.update()
                     else:
+                        # Zoom the camera out
                         self.camera.distance += 1
 
             elif event.type == pygame.MOUSEMOTION:
+                # If the mouse is pressed and in movement
                 if pygame.mouse.get_pressed()[0]:
+                    # Move the mouse along the X and Y axis if the left mouse button is clicked
                     if self.mouse_mvt is not None:
                         self.mouse_mvt = pygame.mouse.get_rel()
-                        #TODO: WS2
                         self.camera.center[0] += (float(self.mouse_mvt[0]) / self.window_size[0])
                         self.camera.center[1] -= (float(self.mouse_mvt[1]) / self.window_size[1])
                     else:
                         self.mouse_mvt = pygame.mouse.get_rel()
 
                 elif pygame.mouse.get_pressed()[2]:
+                    # Rotate the camera around the origin if the right-mouse button is pressed
                     if self.mouse_mvt is not None:
                         self.mouse_mvt = pygame.mouse.get_rel()
-                        #TODO: WS2
                         self.camera.phi -= (float(self.mouse_mvt[0]) / self.window_size[0])
                         self.camera.psi -= (float(self.mouse_mvt[1]) / self.window_size[1])
                     else:
+                        # Get the mouse position
                         self.mouse_mvt = pygame.mouse.get_rel()
                 else:
                     self.mouse_mvt = None

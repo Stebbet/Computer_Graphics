@@ -31,12 +31,10 @@ uniform float alpha = 1.0f;
 ///=== main shader code
 void main() {
     // 1. calculate vectors used for shading calculations
-    // TODO WS4
     vec3 camera_direction = -normalize(position_view_space);
     vec3 light_direction = normalize(light-position_view_space);
 
     // 2. now we calculate light components
-    // TODO WS4
     vec4 ambient = vec4(Ia*Ka,alpha);
     vec4 diffuse = vec4(Id*Kd*max(0.0f,dot(light_direction, normal_view_space)), alpha);
     vec4 specular = vec4(Is*Ks*pow(max(0.0f, dot(reflect(light_direction, normal_view_space), -camera_direction)), Ns), alpha);
